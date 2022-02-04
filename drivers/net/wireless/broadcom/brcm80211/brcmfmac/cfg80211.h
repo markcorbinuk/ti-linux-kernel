@@ -92,6 +92,16 @@
 
 #define BRCMF_VIF_EVENT_TIMEOUT		msecs_to_jiffies(1500)
 
+#define BRCMF_PM_WAIT_MAXRETRY			100
+
+/* cfg80211 wowlan definitions */
+#define WL_WOWLAN_MAX_PATTERNS			8
+#define WL_WOWLAN_MIN_PATTERN_LEN		1
+#define WL_WOWLAN_MAX_PATTERN_LEN		255
+#define WL_WOWLAN_PKT_FILTER_ID_FIRST	201
+#define WL_WOWLAN_PKT_FILTER_ID_LAST	(WL_WOWLAN_PKT_FILTER_ID_FIRST + \
+					WL_WOWLAN_MAX_PATTERNS - 1)
+
 /**
  * enum brcmf_scan_status - scan engine status
  *
@@ -155,6 +165,7 @@ struct brcmf_cfg80211_profile {
 	enum brcmf_profile_fwsup use_fwsup;
 	u16 use_fwauth;
 	bool is_ft;
+	bool is_okc;
 };
 
 /**
@@ -176,6 +187,13 @@ enum brcmf_vif_status {
 	BRCMF_VIF_STATUS_AP_CREATED,
 	BRCMF_VIF_STATUS_EAP_SUCCESS,
 	BRCMF_VIF_STATUS_ASSOC_SUCCESS,
+};
+
+enum brcmf_cfg80211_pm_state {
+	BRCMF_CFG80211_PM_STATE_RESUMED,
+	BRCMF_CFG80211_PM_STATE_RESUMING,
+	BRCMF_CFG80211_PM_STATE_SUSPENDED,
+	BRCMF_CFG80211_PM_STATE_SUSPENDING,
 };
 
 /**
@@ -365,6 +383,8 @@ struct brcmf_cfg80211_info {
 	struct brcmf_cfg80211_wowl wowl;
 	struct brcmf_pno_info *pno;
 	u8 ac_priority[MAX_8021D_PRIO];
+	u8 pm_state;
+	u8 num_softap;
 };
 
 /**
@@ -461,5 +481,6 @@ s32 brcmf_notify_escan_complete(struct brcmf_cfg80211_info *cfg,
 void brcmf_set_mpc(struct brcmf_if *ndev, int mpc);
 void brcmf_abort_scanning(struct brcmf_cfg80211_info *cfg);
 void brcmf_cfg80211_free_netdev(struct net_device *ndev);
+bool brcmf_is_apmode_operating(struct wiphy *wiphy);
 
 #endif /* BRCMFMAC_CFG80211_H */
